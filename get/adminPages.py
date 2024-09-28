@@ -1,12 +1,16 @@
 import asyncio
 import aiohttp
 
+from typing import List
 from colorama import Fore
 
 from utils.files import read_txt_file, write_txt_file
 
 async def get_admin_page(url: str, dataPath: str, verbose: bool, maxConcurrency: int = 10 ) -> None:
-    data: list[str] = read_txt_file(dataPath)
+    data: List[str] | None = read_txt_file(dataPath)
+
+    if not data:
+        return
 
     connector = aiohttp.TCPConnector(limit=maxConcurrency)
     timeout = aiohttp.ClientTimeout(total=30)
@@ -18,6 +22,8 @@ async def get_admin_page(url: str, dataPath: str, verbose: bool, maxConcurrency:
     successful_pages = [page for page in res if page]
     if successful_pages:
         write_txt_file(successful_pages, "output/admin.txt")
+
+    print(f"{Fore.BLUE}[i] Info: {len(successful_pages)} pages found for {url}{Fore.RESET}")
 
 
 async def fetch_page(session: aiohttp.ClientSession, url: str, page: str, verbose: bool) -> str | None:
@@ -33,8 +39,10 @@ async def fetch_page(session: aiohttp.ClientSession, url: str, page: str, verbos
                 return None
 
     except asyncio.TimeoutError:
-        print(f"{Fore.RED}[X] Error: Timeout error for page {page}{Fore.RESET}")
+        if verbose:
+            print(f"{Fore.RED}[X] Error: Timeout error for page {page}{Fore.RESET}")
     except aiohttp.ClientError as e:
-        print(f"{Fore.RED}[X] Error: {page} - {e}{Fore.RESET}")
+        if verbose:
+            print(f"{Fore.RED}[X] Error: {page} - {e}{Fore.RESET}")
         return None
 
