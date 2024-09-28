@@ -35,6 +35,7 @@ python main.py example.com -a wordlists/admin_pages.txt -s wordlists/subdomains.
 - -s wordlists/subdomains.txt: Use the subdomains.txt wordlist for subdomain enumeration.
 - -c 10: Set concurrency to 10 tasks running simultaneously.
 - -v: Enable verbose mode for detailed output.
+
 | Argument | Description | Example |
 |--|--|--|
 | `<domain>`| The domain to scrape (without `http`/`https`). | `example.com` |
