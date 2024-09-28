@@ -26,10 +26,15 @@ To use the scraper, run it with the following options:
 ```bash
 python main.py <domain> [options]
 ```
-### Example:
+### Sample Command Breakdown:
 ```bash
-python main.py example.com -a wordlists/admin_pages.txt -s wordlists/subdomains.txt -c 20 -v
+python main.py example.com -a wordlists/admin_pages.txt -s wordlists/subdomains.txt -c 10 -v
 ```
+- `exemple.com`: The domain to scrape
+- -a wordlists/admin_pages.txt: Use the admin_pages.txt wordlist for admin page discovery.
+- -s wordlists/subdomains.txt: Use the subdomains.txt wordlist for subdomain enumeration.
+- -c 10: Set concurrency to 10 tasks running simultaneously.
+- -v: Enable verbose mode for detailed output.
 | Argument | Description | Example |
 |--|--|--|
 | `<domain>`| The domain to scrape (without `http`/`https`). | `example.com` |
@@ -45,16 +50,6 @@ The output files will be saved in an output/ directory. The tool generates the f
 - `sitemap.xml` from the target domain.
 - `admin_pages.txt` containing discovered admin pages.
 - `subdomains.txt` containing discovered subdomains.
-
-### Sample Command Breakdown:
-```bash
-python main.py example.com -a wordlists/admin_pages.txt -s wordlists/subdomains.txt -c 10 -v
-```
-- `exemple.com`: The domain to scrape
-- -a wordlists/admin_pages.txt: Use the admin_pages.txt wordlist for admin page discovery.
-- -s wordlists/subdomains.txt: Use the subdomains.txt wordlist for subdomain enumeration.
-- -c 10: Set concurrency to 10 tasks running simultaneously.
-- -v: Enable verbose mode for detailed output.
 
 ## Contributing
 Feel free to submit issues and pull requests to improve this tool. Contributions are welcome!
