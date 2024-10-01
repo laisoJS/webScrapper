@@ -7,6 +7,7 @@ from get.sitemap import get_sitemap
 from get.adminPages import get_admin_page
 from get.subdomains import get_subdomain
 from get.dns import dns_query
+from get.cms import wappalyzer_cms
 
 from colorama import Fore
 
@@ -52,6 +53,9 @@ def main() -> None:
         if subdomainList:
             print(f"{Fore.BLUE}[i] Info: Searching for subdomains{Fore.RESET}")
             asyncio.run(get_subdomain(domain, subdomainList, verbose, maxConcurrency))
+
+        print(f"{Fore.BLUE}[i] Info: Scanning for CMS{Fore.RESET}")
+        wappalyzer_cms(domain, verbose)
 
     except KeyboardInterrupt:
         print(f"{Fore.YELLOW}[!] Keyboard interruption detected, quitting...{Fore.RESET}")
