@@ -3,10 +3,11 @@ import json
 from colorama import Fore
 from typing import List, Dict
 
+
 """
     WRITE FILES
 """
-def write_txt_file(data: Dict, path: str) -> None:
+def write_txt_file(data: List[str], path: str) -> None:
     try:
         with open(path, "w", encoding="utf-8") as f:
             for line in data:
@@ -20,6 +21,7 @@ def write_txt_file(data: Dict, path: str) -> None:
         print(f"{Fore.RED}[!] Error: I/O error occured{Fore.RESET}")
     except Exception as e:
         print(f"{Fore.RED}[!] Error: A not recognize error occured:\n{e}\n{Fore.RESET}")
+
 
 def write_json(data: Dict[str, str], path: str) -> None:
     try:
@@ -35,12 +37,12 @@ def write_json(data: Dict[str, str], path: str) -> None:
     except Exception as e:
         print(f"{Fore.RED}[!] Error: A not recognize error occured:\n{e}\n{Fore.RESET}")
 
-
+        
 """
     READ FILES
 """
 
-def read_txt_file(path: str) -> List[str] | None:
+def read_txt_file(path: str) -> List[str]:
     try:
         with open(path, "r", encoding="utf-8") as f:
             lines = [line.strip() for line in f]
