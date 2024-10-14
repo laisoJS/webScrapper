@@ -8,6 +8,9 @@ from get.adminPages import get_admin_page
 from get.subdomains import get_subdomain
 from get.dns import dns_query
 from get.cms import wappalyzer_cms
+from get.form import get_forms
+from get.crawler import crawl_website
+from get.cve import get_cve
 
 from colorama import Fore
 
@@ -37,25 +40,43 @@ def main() -> None:
         os.makedirs("output")
 
     try:
-        print(f"{Fore.BLUE}[i] Info: Gathering robots.txt{Fore.RESET}")
-        get_robots(domain, verbose)
+        if not os.path.exists("output/robots.txt"):
+            print(f"{Fore.BLUE}[i] Info: Gathering robots.txt{Fore.RESET}")
+            get_robots(domain, verbose)
 
-        print(f"{Fore.BLUE}[i] Info: Gathering sitemap.xml{Fore.RESET}")
-        get_sitemap(domain, verbose)
+        if not os.path.exists("output/sitemap_urls.txt"):
+           print(f"{Fore.BLUE}[i] Info: Gathering sitemap.xml{Fore.RESET}")
+           get_sitemap(domain, verbose)
 
-        if adminList:
+
+
+        if adminList and not os.path.exists("output/admin.txt"):
             print(f"{Fore.BLUE}[i] Info: Gathering admin pages{Fore.RESET}")
             asyncio.run(get_admin_page(domain, adminList, verbose, maxConcurrency))
 
-        print(f"{Fore.BLUE}[i] Info: Querying DNS{Fore.RESET}")
-        dns_query(domain, verbose)
+        if not os.path.exists("output/DNS.json"):
+            print(f"{Fore.BLUE}[i] Info: Querying DNS{Fore.RESET}")
+            dns_query(domain, verbose)
+        
+        if not os.path.exists("output/links.txt"):
+            print(f"{Fore.BLUE}[i] Info: Crawling website{Fore.RESET}")
+            asyncio.run(crawl_website(domain, verbose, maxConcurrency))
 
-        if subdomainList:
+        if subdomainList and not os.path.exists("output/subdomains.txt"):
             print(f"{Fore.BLUE}[i] Info: Searching for subdomains{Fore.RESET}")
             asyncio.run(get_subdomain(domain, subdomainList, verbose, maxConcurrency))
+        
+        if not os.path.exists("output/cms.json"):
+            print(f"{Fore.BLUE}[i] Info: Scanning for CMS{Fore.RESET}")
+            wappalyzer_cms(domain, verbose)
 
-        print(f"{Fore.BLUE}[i] Info: Scanning for CMS{Fore.RESET}")
-        wappalyzer_cms(domain, verbose)
+        if not os.path.exists("output/forms.json"):
+            print(f"{Fore.BLUE}[i] Info: Crawling pages for forms{Fore.RESET}")
+            asyncio.run(get_forms(verbose, maxConcurrency))
+
+        if not os.path.exists("output/cve.json"):
+            print(f"{Fore.BLUE}[i] Info: Searching for cve based on cms{Fore.RESET}")
+            get_cve(verbose)
 
     except KeyboardInterrupt:
         print(f"{Fore.YELLOW}[!] Keyboard interruption detected, quitting...{Fore.RESET}")
