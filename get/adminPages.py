@@ -35,7 +35,7 @@ async def fetch_page(session: aiohttp.ClientSession, url: str, page: str, verbos
                 return page
             else:
                 if verbose:
-                    print(f"{Fore.RED}[X]: Page {page} not found [{res.status}] {Fore.RESET}")
+                    print(f"{Fore.YELLOW}[!]: Page {page} not found [{res.status}] {Fore.RESET}")
                 return None
 
     except asyncio.TimeoutError:
