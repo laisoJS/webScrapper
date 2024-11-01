@@ -8,7 +8,7 @@ from get.adminPages import get_admin_page
 from get.subdomains import get_subdomain
 from get.dns import dns_query
 from get.cms import wappalyzer_cms
-from get.form import get_forms
+from get.form import analyze_forms_in_html
 from get.crawler import crawl_website
 from get.cve import get_cve
 
@@ -48,8 +48,6 @@ def main() -> None:
            print(f"{Fore.BLUE}[i] Info: Gathering sitemap.xml{Fore.RESET}")
            get_sitemap(domain, verbose)
 
-
-
         if adminList and not os.path.exists("output/admin.txt"):
             print(f"{Fore.BLUE}[i] Info: Gathering admin pages{Fore.RESET}")
             asyncio.run(get_admin_page(domain, adminList, verbose, maxConcurrency))
@@ -72,7 +70,7 @@ def main() -> None:
 
         if not os.path.exists("output/forms.json"):
             print(f"{Fore.BLUE}[i] Info: Crawling pages for forms{Fore.RESET}")
-            asyncio.run(get_forms(verbose, maxConcurrency))
+            analyze_forms_in_html(domain, verbose)
 
         if not os.path.exists("output/cve.json"):
             print(f"{Fore.BLUE}[i] Info: Searching for cve based on cms{Fore.RESET}")
@@ -85,4 +83,3 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
-
