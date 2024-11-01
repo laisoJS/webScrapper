@@ -1,10 +1,12 @@
+import os
+
 import aiohttp
 import asyncio
 
 from bs4 import BeautifulSoup
 from urllib.parse import urljoin, urlparse, urlunparse
 
-from utils.files import write_txt_file
+from utils.files import write_txt_file, write_raw_txt
 
 from colorama import Fore
 from typing import Set, List
@@ -38,6 +40,8 @@ async def crawl_website(domain: str, verbose: bool, maxConcurrency: int = 10) ->
 
         pages_to_visit: List[str] = [domain_url]
 
+        os.makedirs("output/html", exist_ok=True)
+
         connector = aiohttp.TCPConnector(limit=maxConcurrency)
         timeout = aiohttp.ClientTimeout(total=30)
 
@@ -50,10 +54,14 @@ async def crawl_website(domain: str, verbose: bool, maxConcurrency: int = 10) ->
                     continue
                 visited_urls.add(normalized_url)
 
-                links = await crawl_pages(session, url, verbose)
+                links, html = await crawl_pages(session, url, verbose)
 
                 if not links:
                     continue
+
+                if html:
+                    file_name: str = f"output/html/{urlparse(url).path.replace("/", "_")}.html"
+                    write_raw_txt(html, file_name)
 
                 for link in links:
                     normalized_link = normalize_url(link)
@@ -92,11 +100,9 @@ async def crawl_pages(session: aiohttp.ClientSession, page: str, verbose: bool) 
                             visited_pages.add(full_url)
 
                 links: List[str] = [link for link in visited_pages if not link.startswith(("mailto:", "tel:"))]
-                return links
+                return links, html
 
             elif verbose:
                 print(f"{Fore.YELLOW}[!]: Page {page} not found [{res.status}] {Fore.RESET}")
     except Exception as e:
         print(f"{Fore.RED}[!] Error: An unexpected error occured:\n{e}\n{Fore.RESET}")
-
-
