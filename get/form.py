@@ -1,86 +1,79 @@
 import os
-import asyncio
-import aiohttp
 
 from bs4 import BeautifulSoup
+from typing import List, Dict, Any
 
-from utils.files import write_json, read_txt_file
+from utils.files import write_json
 
-from typing import List
 from colorama import Fore
 
-crawlerPath = "output/links.txt"
+
+def extract_form(html: str, verbose: bool) -> List[Dict[str, Any]]:
+    soup = BeautifulSoup(html, "html.parser")
+    forms = []
+
+    for form in soup.find_all("form"):
+        if verbose:
+            print(f"{Fore.GREEN}[V]: Form found{Fore.RESET}")
+
+        form_details: Dict[str, str] = {
+            "action": form.get("action"),
+            "method": form.get("method", "get").lower(),
+            "inputs": []
+        }
+
+        for input_tag in form.find_all("input"):
+            input_type = input_tag.get("type", "text")
+            input_name = input_tag.get("name")
+            input_value = input_tag.get("value", "")
+
+            form_details["inputs"].append({
+                "type": input_type,
+                "name": input_name,
+                "value": input_value
+            })
+
+        for textarea in form.find_all("textarea"):
+            form_details["inputs"].append({
+                "type": "textarea",
+                "name": textarea.get("name"),
+                "value": textarea.text
+            })
+
+        for select in form.find_all("select"):
+            options = [option.get("value", option.text) for option in select.find_all("option")]
+            form_details["inputs"].append({
+                "type": "select",
+                "name": select.get("name"),
+                "options": options
+            })
+
+        forms.append(form_details)
+
+    return forms
 
 
-async def get_forms(verbose: bool, maxConcurrency: int = 10) -> None:
+def analyze_forms_in_html(domain: str, verbose: bool) -> None:
     forms_data = {}
 
-    if not os.path.exists(crawlerPath):
-        print(f"{Fore.RED}[!] Error: Can't load {crawlerPath}{Fore.RESET}")
-        return
-
-    urls: List[str] = read_txt_file(crawlerPath)
-
     try:
-        connector = aiohttp.TCPConnector(limit=maxConcurrency)
-        timeout = aiohttp.ClientTimeout(total=30)
+        if not os.path.exists("output/html"):
+            print(f"{Fore.YELLOW}[!] Warn: output/html not found.{Fore.RESET}")
+            return
 
-        async with aiohttp.ClientSession(connector=connector, timeout=timeout) as session:
-            tasks = [fetch_pages(session, url, verbose) for url in urls if url ]
-            results = await asyncio.gather(*tasks)
-            
-        for result in results:
-            if result:
-                forms_data[result['url']] = result['html']
+        for file_name in os.listdir("output/html"):
+            file_path = os.path.join("output/html", file_name)
+
+            file_name = f"{domain}{file_name}".replace("_", "/").rstrip(".html")
+
+            with open(file_path, "r", encoding="utf-8") as f:
+                html_content = f.read()
+                forms = extract_form(html_content, verbose)
+                forms_data[file_name] = forms
 
         write_json(forms_data, "output/forms.json")
         if verbose:
-            print(f"{Fore.GREEN}[V]: Found forms on {len(forms_data)} pages{Fore.RESET}")
+            print(f"{Fore.GREEN}[V]: Forms data writed in output/forms.json{Fore.RESET}")
 
     except Exception as e:
-        print(f"{Fore.RED}[X] Error: An unexpected error occured:\n{e}\n{Fore.RESET}")
-    return
-
-
-async def fetch_pages(session: aiohttp.ClientSession, url: str, verbose: bool) -> dict | None:
-    try:
-        async with session.get(url) as response:
-            if response.status == 200:
-                html = await response.text()
-                soup = BeautifulSoup(html, "html.parser")
-                forms = soup.find_all("form")
-
-                if forms:
-                    form_html = ''.join(str(form) for form in forms)
-                    form_list = []
-
-                    for form in forms:
-                        form_info = {
-                            "action": form.get("action", ""),
-                            "method": form.get("method", "GET"),
-                            "inputs": [
-                                {
-                                    "name": input_tag.get("name"),
-                                    "type": input_tag.get("type", "text")
-                                } for input_tag in form.find_all("input")
-                            ]
-                        }
-
-                        form_list.append(form_info)
-
-                    if verbose:
-                        print(f"{Fore.GREEN}[V]: {len(form_list)} forms found on {url}{Fore.RESET}")
-
-                    return {
-                        "url": url,
-                        "html": form_html
-                    }
-            else:
-                if verbose:
-                    print(f"{Fore.YELLOW}[!] Warn: Failed to fetch {url} (Status: {response.status}){Fore.RESET}")
-                return None
-
-    except Exception as e:
-        print(f"{Fore.RED}[X] Error fetching {url}:\n{e}{Fore.RESET}")
-        return None
-
+        print(f"{Fore.RED}[X] Error:{Fore.RESET}")
