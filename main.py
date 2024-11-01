@@ -11,6 +11,7 @@ from get.cms import wappalyzer_cms
 from get.form import analyze_forms_in_html
 from get.crawler import crawl_website
 from get.cve import get_cve
+from get.ssl import check_ssl_cert
 
 from colorama import Fore
 
@@ -75,6 +76,10 @@ def main() -> None:
         if not os.path.exists("output/cve.json"):
             print(f"{Fore.BLUE}[i] Info: Searching for cve based on cms{Fore.RESET}")
             get_cve(verbose)
+
+        if not os.path.exists("output/cert.json"):
+            print(f"{Fore.BLUE}[i] Info: Checking the SSL cert{Fore.RESET}")
+            check_ssl_cert(domain, verbose)
 
     except KeyboardInterrupt:
         print(f"{Fore.YELLOW}[!] Keyboard interruption detected, quitting...{Fore.RESET}")
