@@ -22,6 +22,19 @@ def write_txt_file(data: List[str], path: str) -> None:
     except Exception as e:
         print(f"{Fore.RED}[!] Error: A not recognize error occured:\n{e}\n{Fore.RESET}")
 
+def write_raw_txt(data, path) -> None:
+    try:
+        with open(path, "w", encoding="utf-8") as f:
+            f.write(data)
+
+    except FileExistsError:
+        print(f"{Fore.RED}[!] Error: File already exist ({path}){Fore.RESET}")
+    except PermissionError:
+        print(f"{Fore.RED}[!] Error: Can't write to file {path}{Fore.RESET}")
+    except IOError:
+        print(f"{Fore.RED}[!] Error: I/O error occured{Fore.RESET}")
+    except Exception as e:
+        print(f"{Fore.RED}[!] Error: A not recognize error occured:\n{e}\n{Fore.RESET}")
 
 def write_json(data: Dict[str, str], path: str) -> None:
     try:
