@@ -11,6 +11,7 @@
 - Search for CMS based on the Wappalizer api.
 - Search for CVE based on the gathered CMS.
 - Search for forms in html.
+- Gather data from the SSL cert.
 
 ## ⚙️ Installation
 1. Clone the repository:
@@ -65,6 +66,8 @@ The output files will be saved in an output/ directory. The tool generates the f
 - `links.txt` containing the links of the website
 - `sitemap_urls.txt` containing parsed urls from the sitemap.xml
 - `forms.json` containing gathered form from pages
+- `cert.json` containing data from the SSL cert
+- `cert_key.pem` public key in pem format
 
 ## 🤝 Contributing
 Feel free to submit issues and pull requests to improve this tool. Contributions are welcome!
