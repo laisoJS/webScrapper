@@ -42,10 +42,14 @@ async def crawl_website(domain: str, verbose: bool, maxConcurrency: int = 10) ->
 
         os.makedirs("output/html", exist_ok=True)
 
+        semaphore = asyncio.Semaphore(maxConcurrency)
+
         connector = aiohttp.TCPConnector(limit=maxConcurrency)
         timeout = aiohttp.ClientTimeout(total=30)
 
-        async with aiohttp.ClientSession(connector=connector, timeout=timeout) as session:
+        async with aiohttp.ClientSession(
+            connector=connector, timeout=timeout
+        ) as session:
             while pages_to_visit:
                 url = pages_to_visit.pop(0)
 
@@ -54,13 +58,16 @@ async def crawl_website(domain: str, verbose: bool, maxConcurrency: int = 10) ->
                     continue
                 visited_urls.add(normalized_url)
 
-                links, html = await crawl_pages(session, url, verbose)
+                async with semaphore:
+                    links, html = await crawl_pages(session, url, verbose)
 
                 if not links:
                     continue
 
                 if html:
-                    file_name: str = f"output/html/{urlparse(url).path.replace("/", "_")}.html"
+                    file_name: str = (
+                        f"output/html/{urlparse(url).path.replace("/", "_")}.html"
+                    )
                     write_raw_txt(html, file_name)
 
                 for link in links:
@@ -68,7 +75,10 @@ async def crawl_website(domain: str, verbose: bool, maxConcurrency: int = 10) ->
                     parse_link = urlparse(normalized_link)
 
                     if parse_link.netloc in (domain, domain.lstrip("www.")):
-                        if normalized_link not in visited_urls and normalized_link not in pages_to_visit:
+                        if (
+                            normalized_link not in visited_urls
+                            and normalized_link not in pages_to_visit
+                        ):
                             pages_to_visit.append(normalized_link)
 
                 if verbose:
@@ -81,14 +91,16 @@ async def crawl_website(domain: str, verbose: bool, maxConcurrency: int = 10) ->
         print(f"{Fore.RED}[!] Error: An unexpected error occured:\n{e}\n{Fore.RESET}")
 
 
-async def crawl_pages(session: aiohttp.ClientSession, page: str, verbose: bool) -> List[str]:
+async def crawl_pages(
+    session: aiohttp.ClientSession, page: str, verbose: bool
+) -> List[str]:
     try:
         visited_pages: Set = set()
         async with session.get(page) as res:
             if res.status == 200:
                 html = await res.text()
                 soup = BeautifulSoup(html, "html.parser")
-                
+
                 for link in soup.find_all("a"):
                     href = link.get("href")
                     if href and ("#" not in href):
@@ -99,10 +111,16 @@ async def crawl_pages(session: aiohttp.ClientSession, page: str, verbose: bool) 
                             full_url = normalize_url(urljoin(page, href))
                             visited_pages.add(full_url)
 
-                links: List[str] = [link for link in visited_pages if not link.startswith(("mailto:", "tel:"))]
+                links: List[str] = [
+                    link
+                    for link in visited_pages
+                    if not link.startswith(("mailto:", "tel:"))
+                ]
                 return links, html
 
             elif verbose:
-                print(f"{Fore.YELLOW}[!]: Page {page} not found [{res.status}] {Fore.RESET}")
+                print(
+                    f"{Fore.YELLOW}[!]: Page {page} not found [{res.status}] {Fore.RESET}"
+                )
     except Exception as e:
         print(f"{Fore.RED}[!] Error: An unexpected error occured:\n{e}\n{Fore.RESET}")
