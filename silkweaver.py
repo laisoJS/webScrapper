@@ -28,7 +28,7 @@ def main() -> None:
     parser.add_argument("-a", "--admin", type=str, help="Wordlist for the admin pages")
     parser.add_argument("-s", "--subs", type=str, help="Wordlist for subdomain enumeration")
     parser.add_argument("--ssl", action="store_true", default=False, help="Gather data from the ssl certificate")
-
+    
     parser.add_argument(
         "-c",
         "--concurrency",

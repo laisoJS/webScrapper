@@ -16,7 +16,7 @@
 ## ⚙️ Installation
 1. Clone the repository:
 ```bash
-git clone https://github.com/laisoJS/webScraper.git
+git clone https://github.com/laisoJS/silkWeaver.git
 ```
 2. Install required dependencies:
 ```bash
@@ -33,11 +33,11 @@ echo NDV_API_KEY=<YourAPIKey> > .env
 To use the scraper, run it with the following options:
 ### 🔹 Basic Usage:
 ```bash
-python main.py <domain> [options]
+python silkweaver.py <domain> [options]
 ```
 ### 📋 Sample Command Breakdown:
 ```bash
-python main.py example.com -a wordlists/admin_pages.txt -s wordlists/subdomains.txt -c 10 -v
+python silkweaver.py example.com -a wordlists/admin_pages.txt -s wordlists/subdomains.txt -c 10 -v
 ```
 - `exemple.com`: The domain to scrape
 - -a wordlists/admin_pages.txt: Use the admin_pages.txt wordlist for admin page discovery.
@@ -52,6 +52,7 @@ python main.py example.com -a wordlists/admin_pages.txt -s wordlists/subdomains.
 | `-s`, `--subs` | Path to a wordlist file for subdomain enumeration. | `-s wordlists/subdomains.txt` |
 | `-c`, `--concurrency` | Set the maximum concurrency level for asynchronous tasks. Default: 10. | `-c 20` |
 | `-v`, `--verbose` | Enable verbose output to get detailed information about the process. | `-v` |
+| `--ssl` | Gather data from the SSL certificate and save the public key as a .pem file | `--ssl` |
 
 ## 📂 Output
 The output files will be saved in an output/ directory. The tool generates the following files based on the tasks executed:
